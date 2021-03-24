@@ -20,7 +20,7 @@
       <item>
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>2</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="browser">
          <property name="enabled">
@@ -34,6 +34,34 @@
            <layout class="QGridLayout" name="gridLayout">
             <item row="0" column="0">
              <layout class="QHBoxLayout" name="horizontalLayout_2">
+              <item>
+               <widget class="QToolButton" name="redo">
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="icon">
+                 <iconset>
+                  <normaloff>redo.png</normaloff>redo.png</iconset>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QToolButton" name="reload">
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="icon">
+                 <iconset>
+                  <normaloff>reload.png</normaloff>reload.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>16</width>
+                  <height>16</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
               <item>
                <widget class="QLineEdit" name="eBroURL"/>
               </item>
@@ -55,6 +83,20 @@
             </item>
            </layout>
           </item>
+          <item row="1" column="0">
+           <widget class="QComboBox" name="tools">
+            <item>
+             <property name="text">
+              <string>Choose tool</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Donwload as PDF</string>
+             </property>
+            </item>
+           </widget>
+          </item>
          </layout>
         </widget>
         <widget class="QWidget" name="chat">
@@ -72,6 +114,9 @@ color: rgb(255, 255, 255);</string>
               </property>
               <property name="readOnly">
                <bool>true</bool>
+              </property>
+              <property name="plainText">
+               <string>Chat</string>
               </property>
              </widget>
             </item>

